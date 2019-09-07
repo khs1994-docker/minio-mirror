@@ -1,0 +1,14 @@
+language: go
+
+script:
+- go get github.com/aktau/github-release
+- mkdir minio ; cd minio
+- curl -O https://dl.min.io/server/minio/release/${PLATFORM}/minio.exe
+- curl -O https://dl.min.io/client/mc/release/${PLATFORM}/mc.exe
+- export TAR_FILE="minio-${PLATFORM}.tar.gz"
+- tar -zcvf ${TAR_FILE} minio.exe mc.exe
+- github-release upload --user khs1994-docker --repo minio-mirror --tag nightly --name "${TAR_FILE}" --file "${TAR_FILE}" -R
+
+env:
+  matrix:
+    - PLATFORM=windows-amd64
