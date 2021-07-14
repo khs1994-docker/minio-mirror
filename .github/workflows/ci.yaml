@@ -1,0 +1,21 @@
+on:
+  push:
+  workflow_dispatch:
+
+name: ci
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      PLATFORM: windows-amd64
+    steps:
+    - run: |
+        mkdir minio ; cd minio
+        curl -O https://dl.min.io/server/minio/release/${PLATFORM}/minio.exe
+        curl -O https://dl.min.io/client/mc/release/${PLATFORM}/mc.exe
+        export ZIP_FILE="minio-${PLATFORM}.zip"
+        zip ${ZIP_FILE} minio.exe mc.exe
+        echo $GITHUB_TOKEN | gh auth login --with-token
+        gh release upload nightly "${ZIP_FILE}" -R khs1994-docker/minio-mirror --clobber
