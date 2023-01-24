@@ -42,4 +42,4 @@ jobs:
         gh release upload nightly "${ZIP_FILE}" -R khs1994-docker/minio-mirror --clobber
 
         curl -T "${ZIP_FILE}" -u ${CODING_USERNAME}:${CODING_TOKEN} \
-          "${CODING_URL}/minio?version=latest"
+          "${CODING_URL}/${ZIP_FILE}?version=latest"
