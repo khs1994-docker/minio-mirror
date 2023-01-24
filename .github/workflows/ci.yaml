@@ -1,10 +1,18 @@
 on:
   push:
-  workflow_dispatch:
   schedule:
     - cron: '0 0 * * 4'
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: version
+        required: true
+        default: "RELEASE.2022-10-24T18-35-07Z"
 
 name: ci
+
+env:
+  MINIO_CUSTOM_VERSION: ${{ github.event.inputs.VERSION }}
 
 jobs:
   ci:
@@ -34,12 +42,17 @@ jobs:
           MC_FILE_NAME="mc.exe"
         fi
 
-        curl -O https://dl.min.io/server/minio/release/${PLATFORM}/$MINIO_FILE_NAME
-        curl -O https://dl.min.io/client/mc/release/${PLATFORM}/$MC_FILE_NAME
+        if [ -n "${MINIO_CUSTOM_VERSION}" ];then
+          curl https://dl.min.io/server/minio/release/${PLATFORM}/archive/minio.${MINIO_CUSTOM_VERSION} -o minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip
+          gh release upload nightly minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip -R khs1994-docker/minio-mirror --clobber
+          curl -T "minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip" -u ${CODING_USERNAME}:${CODING_TOKEN} \
+            "${CODING_URL}/${ZIP_FILE}?version=latest"
+        fi
 
         export ZIP_FILE="minio-${PLATFORM}.zip"
         zip ${ZIP_FILE} $MINIO_FILE_NAME $MC_FILE_NAME
         gh release upload nightly "${ZIP_FILE}" -R khs1994-docker/minio-mirror --clobber
+
 
         curl -T "${ZIP_FILE}" -u ${CODING_USERNAME}:${CODING_TOKEN} \
           "${CODING_URL}/${ZIP_FILE}?version=latest"
