@@ -19,6 +19,8 @@ jobs:
     - env: 
         PLATFORM: ${{ matrix.PLATFORM }}
       run: |
+        set -x
+        
         mkdir minio ; cd minio
 
         MINIO_FILE_NAME="minio"
@@ -33,5 +35,5 @@ jobs:
         curl -O https://dl.min.io/client/mc/release/${PLATFORM}/$MC_FILE_NAME
 
         export ZIP_FILE="minio-${PLATFORM}.zip"
-        zip ${ZIP_FILE} minio.exe mc.exe
+        zip ${ZIP_FILE} $MINIO_FILE_NAME $MC_FILE_NAME
         gh release upload nightly "${ZIP_FILE}" -R khs1994-docker/minio-mirror --clobber
