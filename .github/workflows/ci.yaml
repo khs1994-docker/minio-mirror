@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PLATFORM: ["windows-amd64","darwin-arm64","darwin-amd64"]
+        PLATFORM: ["windows-amd64","darwin-arm64","darwin-amd64","linux-amd64","linux-arm","linux-arm64"]
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       PLATFORM: windows-amd64
@@ -34,19 +34,21 @@ jobs:
         
         mkdir minio ; cd minio
 
-        if [ -n "${MINIO_CUSTOM_VERSION}" ];then
-          curl https://dl.min.io/server/minio/release/${PLATFORM}/archive/minio.${MINIO_CUSTOM_VERSION} -o minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip
-          gh release upload nightly minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip -R khs1994-docker/minio-mirror --clobber
-          curl -T "minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip" -u ${CODING_USERNAME}:${CODING_TOKEN} \
-            "${CODING_URL}/minio.${MINIO_CUSTOM_VERSION}.${PLATFORM}.zip?version=latest"
-        fi
-
         MINIO_FILE_NAME="minio"
         MC_FILE_NAME="mc"
 
         if [ $PLATFORM = 'windows-amd64' ];then
           MINIO_FILE_NAME="minio.exe"
           MC_FILE_NAME="mc.exe"
+        fi
+
+        if [ -n "${MINIO_CUSTOM_VERSION}" ];then
+          curl https://dl.min.io/server/minio/release/${PLATFORM}/archive/minio.${MINIO_CUSTOM_VERSION} -o $MINIO_FILE_NAME
+          export ZIP_FILE="minio-${MINIO_CUSTOM_VERSION}-${PLATFORM}.zip"
+          zip ${ZIP_FILE} $MINIO_FILE_NAME
+          gh release upload nightly "${ZIP_FILE}" -R khs1994-docker/minio-mirror --clobber
+          curl -T "${ZIP_FILE}" -u ${CODING_USERNAME}:${CODING_TOKEN} \
+            "${CODING_URL}/${ZIP_FILE}?version=latest"
         fi
 
         curl -O https://dl.min.io/server/minio/release/${PLATFORM}/$MINIO_FILE_NAME
