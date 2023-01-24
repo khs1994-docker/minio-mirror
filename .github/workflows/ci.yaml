@@ -21,12 +21,12 @@ jobs:
       run: |
         mkdir minio ; cd minio
 
-        $MINIO_FILE_NAME="minio"
-        $MC_FILE_NAME="mc"
+        MINIO_FILE_NAME="minio"
+        MC_FILE_NAME="mc"
 
         if [ $PLATFORM = 'windows-amd64' ];then
-          $MINIO_FILE_NAME="minio.exe"
-          $MC_FILE_NAME="mc.exe"
+          MINIO_FILE_NAME="minio.exe"
+          MC_FILE_NAME="mc.exe"
         fi
 
         curl -O https://dl.min.io/server/minio/release/${PLATFORM}/$MINIO_FILE_NAME
