@@ -18,6 +18,9 @@ jobs:
     steps:
     - env: 
         PLATFORM: ${{ matrix.PLATFORM }}
+        CODING_USERNAME: khs1994-1601432822176
+        CODING_TOKEN: ${{secrets.CODING_DOCKER_PASSWORD}}
+        CODING_URL: https://pcit-generic.pkg.coding.net/khs1994-docker/kubernetes
       run: |
         set -x
         
@@ -37,3 +40,6 @@ jobs:
         export ZIP_FILE="minio-${PLATFORM}.zip"
         zip ${ZIP_FILE} $MINIO_FILE_NAME $MC_FILE_NAME
         gh release upload nightly "${ZIP_FILE}" -R khs1994-docker/minio-mirror --clobber
+
+        curl -T "${ZIP_FILE}" -u ${CODING_USERNAME}:${CODING_TOKEN} \
+          "${CODING_URL}/minio?version=latest"
